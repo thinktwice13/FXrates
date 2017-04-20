@@ -2,6 +2,7 @@
 
 const express = require('express');
 const dotenv = require('dotenv').config();
+const mongoose = require('mongoose');
 
 const app = express();
 const router = express.Router();
@@ -33,7 +34,22 @@ app.get("/", (req, res) => res.send("I'm home"));
 app.get("/transactions/", (req, res) => res.json(SEED));
 app.post("/uploads", (req, res) => {
   // let transaction = new Transaction();
-  console.log("received post request from client")
+  console.log("received post request from client");
+
+
+  //TODO: server file upload
+  //  const file = req.file;
+  //  const meta = req.body;
+  // axios.post({
+  //   this.props.url + "/uploads",
+  //   method = "post",
+  //   data: {
+  //     file,
+  //     name: meta.name
+  //   },
+  // })
+  // .then(response => res.status(200).json(response.data.data))
+  // .catch((error) => res.status(500).json(error.response.data));
 })
 
 app.listen(app.get("port"), () => console.log("Server listening on port " + app.get("port") + "."));

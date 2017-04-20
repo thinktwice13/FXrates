@@ -1,21 +1,29 @@
 import React, { Component } from 'react';
 import axios from "axios";
+import api from "./api";
 
+//TODO: split into modules
 
 class Table extends Component {
   render() {
     return (
-      <div>Table here</div>
+      <div>{JSON.stringify(this.props.tableDatanull, 2)}</div>
     )
   }
 }
 
 class FileUpload extends Component {
+  handleChange(event) {
+    //TODO: handle file upload
+  }
+
   render() {
     return (
       <form>
         <input
-          type="file" />
+          type="file"
+          id="fileupload"
+          onChange={this.handleChange.bind(this)} />
         <button
           type="submit">
           Submit
@@ -48,33 +56,76 @@ class App extends Component {
     super(props);
 
     this.state = {
-      base: this.props.currencies[0]
+      base: this.props.currencies[0],
+      transactions: null,
+      exchangeData: null
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
     this.handleFileUpload = this.handleFileUpload.bind(this);
+    this.loadTransactions = this.loadTransactions.bind(this);
   }
 
   componentDidMount() {
-    //TODO: get exchange rates data
+    //get exchange rates
+    api.getExchangeRates(this.state.base, this.props.currencies)
+      .then(res => this.setState({exchangeData: res}));
+
+    //FIXME: switch from seed data to uploaded file source
+    this.loadTransactions();
   }
 
   handleCurrChange(curr) {
     this.setState({ base: curr });
     //TODO: recalculate exchange rates data
+    api.recalculateRates(curr, this.state.exchangeData)
   }
 
-  //TODO: handle file upload
   handleFileUpload() {
-    
+    //TODO: handle file upload
+    // const file = files[0];
+    // this.props.actions.uploadRequest({
+    //    file,
+    //    name: 'Awesome Cat Pic'
+    // })
   }
+
+  loadTransactions() {
+    axios.get(this.props.url + "/transactions")
+      .then(res => {
+        //summarize transactions by currency
+        let summary = {};
+        res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += item.amount : summary[item.currency] = item.amount);
+        this.setState({ transactions: summary })}
+      )
+  }
+
+
 
   render() {
+    let {base, exchangeData, transactions} = this.state;
+    let tblArr = []
+    if (base && exchangeData && transactions) {
+      exchangeData.map(entry => {
+        let obj = {};
+        obj.date = entry.date;
+        obj.timestamp = entry.timestamp;
+
+        //loop through transactions
+        obj.baseSum = 0;
+        obj.baseSum += Object.keys(transactions).map(tx => {
+          console.log(tx);
+        })
+      }) 
+    }
+
+
+
+
     return (
       <div className="app">
         <div className="selector">
-          <FileUpload
-            onChange={this.handleFileUpload}>
+          <FileUpload>
           </FileUpload>
           <Switcher
             onCurrChange={this.handleCurrChange}
@@ -83,8 +134,7 @@ class App extends Component {
         </div>
         <div>
           <Table
-            rates="TODO">
-
+            tableData={tblArr}>
           </Table>
         </div>
       </div>
