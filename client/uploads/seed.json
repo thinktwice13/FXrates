@@ -1,0 +1,33 @@
+[
+	{
+		"currency":"EUR",
+		"amount":10
+	},{
+		"currency":"USD",
+		"amount":10
+	},{
+		"currency":"GBP",
+		"amount":10
+	},{
+		"currency":"GBP",
+		"amount":10
+	},{
+		"currency":"JPY",
+		"amount":10
+	},{
+		"currency":"CAD",
+		"amount":10
+	},{
+		"currency":"CAD",
+		"amount":10
+	},{
+		"currency":"EUR",
+		"amount":10
+	},{
+		"currency":"USD",
+		"amount":10
+	},{
+		"currency":"CHF",
+		"amount":10
+	}
+]
