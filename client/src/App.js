@@ -104,19 +104,37 @@ class App extends Component {
 
   render() {
     let {base, exchangeData, transactions} = this.state;
-    let tblArr = []
-    if (base && exchangeData && transactions) {
+    //manipulate transactions vs api data
+    let tblArr = [];
+    if (transactions !== null && exchangeData !== null) {
+      //loop through exchangge rate data
       exchangeData.map(entry => {
         let obj = {};
         obj.date = entry.date;
         obj.timestamp = entry.timestamp;
-
-        //loop through transactions
+        //FIXME:refcator NOT NEEDED
+        obj.converted = []; Object.keys(transactions).map(key => {
+          if (key !== base) obj.converted.push(transactions[key].toFixed(2) + "  " + key)
+        });
+        //chosen curency summary calc
         obj.baseSum = 0;
         obj.baseSum += Object.keys(transactions).map(tx => {
           console.log(tx);
         })
-      }) 
+        tblArr.push(obj);
+      })
+      //TODO: remove duplicates
+      // tblArr = tblArr.filter((el,i) => {
+      //   console.log(tblArr[i-1].timestamp);
+      //   return tblArr[i].timestamp !== tblArr[i-1];
+      // });
+      tblArr.sort((a, b) => {
+        return b.baseSum -  a.baseSum;
+      });
+      tblArr.length = 5;
+      tblArr.map(item => {
+        item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;
+      })
     }
 
 
@@ -132,11 +150,12 @@ class App extends Component {
             options={this.props.currencies} >
           </Switcher>
         </div>
-        <div>
-          <Table
-            tableData={tblArr}>
-          </Table>
-        </div>
+        { (transactions !== null && exchangeData !== null) ? <Table tableData={tblArr}></Table> : null
+          }
+          <p>
+            Accepts JSON file upload in <span><code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code></span> format.
+            Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
+          </p>
       </div>
     );
   }
