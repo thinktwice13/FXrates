@@ -60,12 +60,13 @@ class App extends Component {
   })
   }
 
-  removeDuplicates(arr) {
-    let tmp = [];
-    for (let i = 0; i < arr.length-1; i++) {
-      if (arr[i].timestamp !== arr[i+1].timestamp) {
-        tmp.push(arr[i]);
-      }
+    //FIXME: table loading too soon
+    if (txs === undefined) {
+      axios.get(this.props.url + "/transactions")
+        .then(res => { this.setState({transactions: summarize(res.data)})
+      })
+    } else {
+      this.setState({transactions: summarize(txs)});
     }
     return tmp;
   }
@@ -114,9 +115,18 @@ class App extends Component {
             options={this.props.currencies} >
           </Switcher>
         </div>
-        { (transactions !== null && exchangeData !== null) ? <Table tableData={tblArr}></Table> : null
-          }
-          <p>
+        { (this.state.transactions && this.state.exchangeData ) ?
+          <Table
+            tableData={this.getTblData}
+            // converted={Object.keys(transactions).reduce((a,key) => {
+            //     return key !== base ? `${a}${transactions[key]} ${key}, ` : a +"";
+            //   }, "").slice(0,-2)} /> : null
+
+              converted={Object.keys(transactions).reduce((a,key) => {
+                  return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
+                }, "").slice(0,-4)} /> : null
+        }
+          <p className="desc">
             Accepts JSON file upload in <span><code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code></span> format.
             Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
           </p>

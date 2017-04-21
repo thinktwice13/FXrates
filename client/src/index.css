@@ -17,6 +17,46 @@ body {
     sans-serif;
 }
 
+table {
+  width: 600px;
+  margin: 30px 0;
+  border: 1px solid silver;
+  text-align: center;
+}
+
+th {
+  background: silver;
+  padding: 5px;
+}
+
+td {
+  min-width: 100px;
+  padding: 5px;
+}
+
+button {
+  padding: 10px;
+}
+
+input {
+  padding: 10px;
+}
+
+.desc {
+  width: 600px;
+  line-height: 1.7
+}
+
+.data-src {
+  margin: 0 0 20px 0;
+  font-size: 12px;
+  text-align: center
+}
+
+.data-src a {
+  font-weight: bold;
+}
+
 .app {
   display: flex;
   flex-direction: column;

@@ -6,32 +6,33 @@ class Table extends Component {
     let data = this.props.tableData;
     return (
       <div>
-        <table>
-          <tbody>
-            <tr>
-              <th>Comverted</th>
-            </tr>
-            <tr>
-              <td>{data[0].converted.join(",  ")}</td>
-            </tr>
-          </tbody>
-        </table>
-
-        <table>
-          <tbody>
-            <tr>
-              <th>Date</th>
-              <th>Sum</th>
-            </tr>
-            {data.map((entry,i)  => {
-              return <tr key={i}>
-                <td>{entry.date}</td>
-                <td>{entry.baseSum}</td>
-
+        <div>
+          <table>
+            <tbody>
+              <tr>
+                <th>Comverted</th>
               </tr>
-            })}
-          </tbody>
-        </table>
+              <tr>
+                <td>{this.props.converted}</td>
+              </tr>
+            </tbody>
+          </table>
+          <table>
+            <tbody>
+              <tr>
+                <th>Date</th>
+                <th>Sum</th>
+              </tr>
+              {data.map((entry,i)  => {
+                return <tr key={i}>
+                  <td>{entry.date}</td>
+                  <td>{entry.baseSum}</td>
+                </tr>
+              })}
+            </tbody>
+          </table>
+        </div>
+        <p className="data-src">Data Source: <a target="_blank" href="http://fixer.io">fixer.io</a></p>
       </div>
     )
   }
