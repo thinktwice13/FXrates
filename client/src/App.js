@@ -1,7 +1,11 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import api from "./api";
+import Table from "./Table";
+import FileUpload from "./FileUpload";
+import Switcher from "./Switcher";
 
+<<<<<<< HEAD
 //TODO: split into modules
 
 class Table extends Component {
@@ -50,6 +54,8 @@ class Switcher extends Component {
     )
   }
 }
+=======
+>>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
 
 class App extends Component {
   constructor(props) {
@@ -95,12 +101,29 @@ class App extends Component {
       .then(res => {
         //summarize transactions by currency
         let summary = {};
+<<<<<<< HEAD
         res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += item.amount : summary[item.currency] = item.amount);
         this.setState({ transactions: summary })}
       )
   }
 
 
+=======
+        res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += +item.amount : summary[item.currency] = +item.amount);
+        this.setState({ transactions: summary });
+      })
+  }
+
+  removeDuplicates(arr) {
+    let tmp = [];
+    for (let i = 0; i < arr.length-1; i++) {
+      if (arr[i].timestamp !== arr[i+1].timestamp) {
+        tmp.push(arr[i]);
+      }
+    }
+    return tmp;
+  }
+>>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
 
   render() {
     let {base, exchangeData, transactions} = this.state;
@@ -116,18 +139,14 @@ class App extends Component {
         obj.converted = []; Object.keys(transactions).map(key => {
           if (key !== base) obj.converted.push(transactions[key].toFixed(2) + "  " + key)
         });
-        //chosen curency summary calc
+        //chosen currency summary calc
         obj.baseSum = 0;
         obj.baseSum += Object.keys(transactions).map(tx => {
           console.log(tx);
         })
         tblArr.push(obj);
       })
-      //TODO: remove duplicates
-      // tblArr = tblArr.filter((el,i) => {
-      //   console.log(tblArr[i-1].timestamp);
-      //   return tblArr[i].timestamp !== tblArr[i-1];
-      // });
+      tblArr = this.removeDuplicates(tblArr);
       tblArr.sort((a, b) => {
         return b.baseSum -  a.baseSum;
       });
@@ -137,9 +156,12 @@ class App extends Component {
       })
     }
 
+<<<<<<< HEAD
 
 
 
+=======
+>>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
     return (
       <div className="app">
         <div className="selector">

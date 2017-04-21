@@ -8,10 +8,9 @@ App hosted on [Heroku](https://fxrates-5697.herokuapp.com/)
 
 
 TODO:
-* file uploads!!! :/
+* file uploads **!!!** :/
+* prop-types
 * table sorting
-* split client app into modules
-* remove duplicates from exchange rates data
 * cleanup warnings
 --------
 Using [fixer.io](fixer.io) data

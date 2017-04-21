@@ -3,10 +3,10 @@
 const express = require('express');
 const dotenv = require('dotenv').config();
 const mongoose = require('mongoose');
+const SEED = require('./client/uploads/seed');
+const Transaction = require('./models/transaction');
 
 const app = express();
-const router = express.Router();
-const SEED = require('./client/uploads/seed');
 
 //DB config
 mongoose.connect(`mongodb://${process.env.DB_USER}:${process.env.DB_PASS}@ds135029.mlab.com:35029/tt13`);
@@ -31,10 +31,23 @@ app.use((req, res, next) => {
 
 //ROUTES
 app.get("/", (req, res) => res.send("I'm home"));
-app.get("/transactions/", (req, res) => res.json(SEED));
+app.get("/transactions/", (req, res) => {
+  //seed data from /cleint/upload/seed.json
+  // res.json(SEED);
+
+  //seed from mlab
+  Transaction.find((err, transaction) => {
+    if (err) res.send(err);
+    res.json(transaction);
+  });
+});
 app.post("/uploads", (req, res) => {
   // let transaction = new Transaction();
-  console.log("received post request from client");
+  let transaction = new Transaction(req.body); //?????????
+  transaction.save((err, tx) => {
+    if (err) res.send(err);
+    res.json({ message: "YAY"});
+  })
 
 
   //TODO: server file upload
