@@ -34,10 +34,10 @@
     "eslint-plugin-react": "6.9.0"
   },
   "scripts": {
-    "start": "nf start -p $PORT",
-    "server-dev": "nodemon server",
-    "start-dev": "concurrently \"npm run server-dev\" \"cd client/ && npm start\"",
-    "heroku-postbuild": "npm i && cd client/ && npm i --only=dev && npm i && npm run build"
+    "server": "nodemon server",
+    "start-dev": "concurrently \"npm run server\" \"cd client/ && npm start\"",
+    "heroku-postbuild": "npm i && cd client/ && npm i --only=dev && npm i && npm run build",
+    "build": "npm i && cd client/ && npm i && npm run build && cd .. && concurrently \"npm run server\" \"cd client/ && serve -s build\""
   },
   "cacheDirectories": [
     "node_modules",
