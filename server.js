@@ -42,7 +42,7 @@ app.get("/transactions/", (req, res) => {
   });
 });
 app.post("/uploads", (req, res) => {
-  // let transaction = new Transaction();
+  console.log(req.body);
   let transaction = new Transaction(req.body); //?????????
   transaction.save((err, tx) => {
     if (err) res.send(err);

@@ -1,21 +1,35 @@
 import React, { Component } from 'react';
 
 class FileUpload extends Component {
-  handleChange(event) {
-    //TODO: handle file upload
+  constructor(props) {
+    super(props);
+    this.state = { file: null }
+
+    this.handleFile = this.handleFile.bind(this);
+  }
+  //   //TODO: handle file upload
+
+  handleFile (e) {
+    let self = this;
+    let reader = new FileReader();
+    let file = e.target.files[0];
+    reader.onload = (upload) =>  {
+      let result = JSON.parse(upload.target.result);
+      self.setState({ file: JSON.parse(upload.target.result) });
+      this.props.onFileSubmit(this.state.file);
+    }
+    reader.readAsText(file);
   }
 
   render() {
     return (
-      <form>
+      <form
+        encType="multipart/form-data">
         <input
           type="file"
-          id="fileupload"
-          onChange={this.handleChange.bind(this)} />
-        <button
-          type="submit">
-          Submit
-        </button>
+          accept=".json"
+          id="fileinput"
+          onChange={this.handleFile} />
       </form>
     )
   }

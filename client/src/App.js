@@ -22,6 +22,10 @@ class App extends Component {
   }
 
   componentDidMount() {
+
+    //FIXME: switch from seed data to uploaded file source
+    // this.loadTransactions("db");
+
     //get exchange rates
     api.getExchangeRates(this.state.base, this.props.currencies)
       .then(res => this.setState({exchangeData: res}));
@@ -36,23 +40,24 @@ class App extends Component {
     api.recalculateRates(curr, this.state.exchangeData)
   }
 
-  handleFileUpload() {
+  handleFileUpload(data) {
     //TODO: handle file upload
-    // const file = files[0];
-    // this.props.actions.uploadRequest({
-    //    file,
-    //    name: 'Awesome Cat Pic'
-    // })
+    // axios.post(this.props.url  + "/uploads", {test:"test"})
+    this.loadTransactions(data)
   }
 
-  loadTransactions() {
+  loadTransactions(src) {
+    //FIXME: table loading too soon
     axios.get(this.props.url + "/transactions")
-      .then(res => {
-        //summarize transactions by currency
-        let summary = {};
-        res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += +item.amount : summary[item.currency] = +item.amount);
-        this.setState({ transactions: summary });
-      })
+    .then(res => {
+      //summarize transactions by currency
+      let summary = {};
+      res.data.map(item => {
+        summary.hasOwnProperty(item.currency) ? summary[item.currency] += +item.amount : summary[item.currency] = +item.amount;
+    })
+    delete summary.undefined;
+    this.setState({ transactions: summary });
+  })
   }
 
   removeDuplicates(arr) {
@@ -92,8 +97,8 @@ class App extends Component {
       return tmp;
     })(tblArr);
 
-    tblArr.sort((a, b) => { return b.baseSum -  a.baseSum });
-    tblArr.length = 5;
+    tblArr.sort((a, b) => { return b.baseSum -  a.baseSum }).length = 5;
+    // tblArr.length = 5;
     tblArr.map(item => {
       item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;
     });
