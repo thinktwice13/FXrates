@@ -5,57 +5,6 @@ import Table from "./Table";
 import FileUpload from "./FileUpload";
 import Switcher from "./Switcher";
 
-<<<<<<< HEAD
-//TODO: split into modules
-
-class Table extends Component {
-  render() {
-    return (
-      <div>{JSON.stringify(this.props.tableDatanull, 2)}</div>
-    )
-  }
-}
-
-class FileUpload extends Component {
-  handleChange(event) {
-    //TODO: handle file upload
-  }
-
-  render() {
-    return (
-      <form>
-        <input
-          type="file"
-          id="fileupload"
-          onChange={this.handleChange.bind(this)} />
-        <button
-          type="submit">
-          Submit
-        </button>
-      </form>
-    )
-  }
-}
-
-class Switcher extends Component {
-  currChange(e) {
-    e.preventDefault();
-    this.props.onCurrChange(e.target.value);
-  }
-
-  render() {
-    return (
-      <select
-        onChange={this.currChange.bind(this)}>
-        {this.props.options.map(curr => {
-          return <option key={curr} value={curr}>{curr}</option>
-        })}
-      </select>
-    )
-  }
-}
-=======
->>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
 
 class App extends Component {
   constructor(props) {
@@ -101,14 +50,6 @@ class App extends Component {
       .then(res => {
         //summarize transactions by currency
         let summary = {};
-<<<<<<< HEAD
-        res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += item.amount : summary[item.currency] = item.amount);
-        this.setState({ transactions: summary })}
-      )
-  }
-
-
-=======
         res.data.map(item => summary.hasOwnProperty(item.currency) ? summary[item.currency] += +item.amount : summary[item.currency] = +item.amount);
         this.setState({ transactions: summary });
       })
@@ -123,45 +64,41 @@ class App extends Component {
     }
     return tmp;
   }
->>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
 
   render() {
     let {base, exchangeData, transactions} = this.state;
     //manipulate transactions vs api data
     let tblArr = [];
-    if (transactions !== null && exchangeData !== null) {
-      //loop through exchangge rate data
-      exchangeData.map(entry => {
-        let obj = {};
-        obj.date = entry.date;
-        obj.timestamp = entry.timestamp;
-        //FIXME:refcator NOT NEEDED
-        obj.converted = []; Object.keys(transactions).map(key => {
-          if (key !== base) obj.converted.push(transactions[key].toFixed(2) + "  " + key)
-        });
-        //chosen currency summary calc
-        obj.baseSum = 0;
-        obj.baseSum += Object.keys(transactions).map(tx => {
-          console.log(tx);
-        })
-        tblArr.push(obj);
-      })
-      tblArr = this.removeDuplicates(tblArr);
-      tblArr.sort((a, b) => {
-        return b.baseSum -  a.baseSum;
-      });
-      tblArr.length = 5;
-      tblArr.map(item => {
-        item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;
-      })
-    }
+    exchangeData.map(entry => {
+      let obj = {
+        date: entry.date,
+        timestamp: entry.timestamp,
+        baseSum: Object.keys(transactions).reduce((a,tx) => {
+          return a + transactions[tx] / +entry.rates[tx];
+        }, 0),
+        //FIXME: remove from loop!
+        converted: Object.keys(transactions).reduce((a,key) => {
+          return key !== base ? `${a}${transactions[key]} ${key}-` : a +"";
+        }, "").split("-").slice(0,-1)
+      }
+      tblArr.push(obj);
+    })
+    //remove duplicates
+    tblArr = ((arr) => {
+      let tmp = [];
+      for (let i = 0; i < arr.length-1; i++) {
+        (arr[i].timestamp !== arr[i+1].timestamp) ? tmp.push(arr[i]) : null;
+      }
+      return tmp;
+    })(tblArr);
 
-<<<<<<< HEAD
-
-
-
-=======
->>>>>>> 4e49ce4... add mongo seed, split to modules, remove duplicate rates
+    tblArr.sort((a, b) => { return b.baseSum -  a.baseSum });
+    tblArr.length = 5;
+    tblArr.map(item => {
+      item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;
+    });
+    return tblArr;
+  }
     return (
       <div className="app">
         <div className="selector">
