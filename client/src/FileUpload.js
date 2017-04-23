@@ -1,25 +1,26 @@
 import React, { Component } from 'react';
 
 class FileUpload extends Component {
-  constructor(props) {
-    super(props);
-    this.state = { file: null }
-
-    this.handleFile = this.handleFile.bind(this);
-  }
-  //   //TODO: handle file upload
+  // constructor(props) {
+  //   super(props);
+  //   this.state = { file: null }
+  //
+  //   this.handleFile = this.handleFile.bind(this);
+  // }
 
   handleFile (e) {
-    let self = this;
+  //check if file is .json
+  //TODO: validate json data format
+  if (e.target.value.endsWith(".json")) {
     let reader = new FileReader();
     let file = e.target.files[0];
-    reader.onload = (upload) =>  {
-      let result = JSON.parse(upload.target.result);
-      self.setState({ file: JSON.parse(upload.target.result) });
-      this.props.onFileUpload(this.state.file);
+    reader.onload = upload =>  {
+      this.props.onFileUpload(JSON.parse(upload.target.result));
     }
     reader.readAsText(file);
   }
+  else this.props.onFileUpload(null);
+}
 
   render() {
     return (
@@ -29,7 +30,7 @@ class FileUpload extends Component {
           type="file"
           accept=".json"
           id="fileinput"
-          onChange={this.handleFile} />
+          onChange={this.handleFile.bind(this)} />
       </form>
     )
   }

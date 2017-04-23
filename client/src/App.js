@@ -27,45 +27,57 @@ class App extends Component {
   }
 
   handleFileData(fileData) {
-    //send file contents to server
-    axios.post(this.props.url  + "/uploads", fileData)
-    .catch(err => console.log(err));
-
-    //summarize transaction data
     let txSummary = {};
-    fileData.map(tx => {
-      txSummary.hasOwnProperty(tx.currency) ?
+    let rates = [];
+    console.log(fileData);
+    if (fileData) {
+      console.log("Setting txs");
+      //send file contents to server
+      axios.post(this.props.url  + "/uploads", fileData)
+      .catch(err => console.log(err));
+
+      //summarize transaction data
+      fileData.map(tx => {
+        txSummary.hasOwnProperty(tx.currency) ?
         txSummary[tx.currency] += +tx.amount :
         txSummary[tx.currency] = +tx.amount;
-    });
-    //temp fix
-    // delete txSummary.undefined;
+      });
+      //temp fix
+      // delete txSummary.undefined;
 
-    //get exchange rates
-    let currencies = Object.keys(txSummary).reduce((a,key) => {
-      return a + key + ",";
-    },"");
-    api.getExchangeRates(this.state.base, currencies)
-    .then(res => {
-      let rates = [];
-      res.map(item => {
-        //add chosen currency rate
-        item.data.rates[item.data.base] = 1.0;
-        rates.push(item.data);
-      })
+      //get exchange rates
+      let currencies = Object.keys(txSummary).reduce((a,key) => {
+        return a + key + ",";
+      },"");
+      api.getExchangeRates(this.state.base, currencies)
+      .then(res => {
+        res.map(item => {
+          //add chosen currency rate
+          item.data.rates[item.data.base] = 1.0;
+          rates.push(item.data);
+        })
 
-      //filter transactions (remove currencies without rates data or undefined)
-      txSummary = Object.keys(txSummary)
+        //filter transactions (remove currencies without rates data or undefined)
+        txSummary = Object.keys(txSummary)
         .filter(key => Object.keys(res[0].data.rates).includes(key))
         .reduce((obj, key) => {
           obj[key] = txSummary[key];
           return obj;
         },{});
+        this.setState({
+          transactions: txSummary,
+          exchangeData: rates
+        });
+      });
+    }
+    else {
+      console.log("setting null state");
       this.setState({
-        transactions: txSummary,
-        exchangeData: rates
-       });
-    })
+        transactions: null,
+        exchangeData: null
+      });
+    }
+
 
   }
 
