@@ -5,7 +5,6 @@ import Table from "./Table";
 import FileUpload from "./FileUpload";
 import Switcher from "./Switcher";
 
-
 class App extends Component {
   constructor(props) {
     super(props);
@@ -17,21 +16,8 @@ class App extends Component {
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
-    this.handleFileUpload = this.handleFileUpload.bind(this);
-    this.loadTransactions = this.loadTransactions.bind(this);
-  }
-
-  componentDidMount() {
-
-    //FIXME: switch from seed data to uploaded file source
-    // this.loadTransactions("db");
-
-    //get exchange rates
-    api.getExchangeRates(this.state.base, this.props.currencies)
-      .then(res => this.setState({exchangeData: res}));
-
-    //FIXME: switch from seed data to uploaded file source
-    this.loadTransactions();
+    this.handleFileData = this.handleFileData.bind(this);
+    this.getTblData = this.getTblData.bind(this);
   }
 
   handleCurrChange(curr) {
@@ -40,45 +26,56 @@ class App extends Component {
     api.recalculateRates(curr, this.state.exchangeData)
   }
 
-  handleFileUpload(data) {
-    //TODO: handle file upload
-    // axios.post(this.props.url  + "/uploads", {test:"test"})
-    this.loadTransactions(data)
-  }
+  handleFileData(fileData) {
+    //send file contents to server
+    axios.post(this.props.url  + "/uploads", fileData)
+    .catch(err => console.log(err));
 
-  loadTransactions(src) {
-    //FIXME: table loading too soon
-    axios.get(this.props.url + "/transactions")
+    //summarize transaction data
+    let txSummary = {};
+    fileData.map(tx => {
+      txSummary.hasOwnProperty(tx.currency) ?
+        txSummary[tx.currency] += +tx.amount :
+        txSummary[tx.currency] = +tx.amount;
+    });
+    //temp fix
+    // delete txSummary.undefined;
+
+    //get exchange rates
+    let currencies = Object.keys(txSummary).reduce((a,key) => {
+      return a + key + ",";
+    },"");
+    api.getExchangeRates(this.state.base, currencies)
     .then(res => {
-      //summarize transactions by currency
-      let summary = {};
-      res.data.map(item => {
-        summary.hasOwnProperty(item.currency) ? summary[item.currency] += +item.amount : summary[item.currency] = +item.amount;
-    })
-    delete summary.undefined;
-    this.setState({ transactions: summary });
-  })
-  }
-
-    //FIXME: table loading too soon
-    if (txs === undefined) {
-      axios.get(this.props.url + "/transactions")
-        .then(res => { this.setState({transactions: summarize(res.data)})
+      let rates = [];
+      res.map(item => {
+        //add chosen currency rate
+        item.data.rates[item.data.base] = 1.0;
+        rates.push(item.data);
       })
-    } else {
-      this.setState({transactions: summarize(txs)});
-    }
-    return tmp;
+
+      //filter transactions (remove currencies without rates data or undefined)
+      txSummary = Object.keys(txSummary)
+        .filter(key => Object.keys(res[0].data.rates).includes(key))
+        .reduce((obj, key) => {
+          obj[key] = txSummary[key];
+          return obj;
+        },{});
+      this.setState({
+        transactions: txSummary,
+        exchangeData: rates
+       });
+    })
+
   }
 
-  render() {
-    let {base, exchangeData, transactions} = this.state;
-    //manipulate transactions vs api data
+  getTblData() {
+    //construct table data
+    let { base, transactions, exchangeData } = this.state;
     let tblArr = [];
     exchangeData.map(entry => {
       let obj = {
         date: entry.date,
-        timestamp: entry.timestamp,
         baseSum: Object.keys(transactions).reduce((a,tx) => {
           return a + transactions[tx] / +entry.rates[tx];
         }, 0),
@@ -93,45 +90,49 @@ class App extends Component {
     tblArr = ((arr) => {
       let tmp = [];
       for (let i = 0; i < arr.length-1; i++) {
-        (arr[i].timestamp !== arr[i+1].timestamp) ? tmp.push(arr[i]) : null;
+        (arr[i].date !== arr[i+1].date) ? tmp.push(arr[i]) : null;
       }
       return tmp;
     })(tblArr);
-
+    //sort by sum amount
     tblArr.sort((a, b) => { return b.baseSum -  a.baseSum }).length = 5;
-    // tblArr.length = 5;
-    tblArr.map(item => {
-      item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;
+    //sort by date
+    tblArr.sort((a, b) => {
+      if (b.date > a.date) return 1
+      else if (b.date < a.date) return -1
+      else return 0;
     });
+    //round and stringify
+    tblArr.map(item => { item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;  });
     return tblArr;
   }
+
+  render() {
+    let { base, exchangeData, transactions } = this.state;
     return (
       <div className="app">
         <div className="selector">
-          <FileUpload>
+          <FileUpload
+            onFileUpload={this.handleFileData}>
           </FileUpload>
           <Switcher
             onCurrChange={this.handleCurrChange}
             options={this.props.currencies} >
           </Switcher>
         </div>
-        { (this.state.transactions && this.state.exchangeData ) ?
+        { transactions && exchangeData &&
           <Table
             tableData={this.getTblData}
-            // converted={Object.keys(transactions).reduce((a,key) => {
-            //     return key !== base ? `${a}${transactions[key]} ${key}, ` : a +"";
-            //   }, "").slice(0,-2)} /> : null
-
-              converted={Object.keys(transactions).reduce((a,key) => {
-                  return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
-                }, "").slice(0,-4)} /> : null
-        }
+            converted={Object.keys(transactions).reduce((a,key) => {
+              return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
+            }, "").slice(0,-4)} />
+          }
           <p className="desc">
             Accepts JSON file upload in <span><code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code></span> format.
             Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
           </p>
-      </div>
-    );
+        </div>
+      );
   }
 }
 

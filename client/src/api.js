@@ -24,7 +24,7 @@ export default {
     let promises = [];
     let apiUrl = "http://api.fixer.io/";
 
-    //get formated api call strings
+    //get formatted api urls
     dates.map(date => {
       let url = apiUrl + date + "?base=" + base + "&symbols=" + symbols;
       return promises.push(axios.get(url));
@@ -44,7 +44,8 @@ export default {
   },
   recalculateRates(base, fxdata) {
     //recalculate exchange rates for new base currency
-    return fxdata.map(item => {
+    return fxdata && 
+    fxdata.map(item => {
       item.base = base;
       let saved = item.rates[base];
       Object.keys(item.rates).map(rate => {

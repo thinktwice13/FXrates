@@ -16,7 +16,7 @@ class FileUpload extends Component {
     reader.onload = (upload) =>  {
       let result = JSON.parse(upload.target.result);
       self.setState({ file: JSON.parse(upload.target.result) });
-      this.props.onFileSubmit(this.state.file);
+      this.props.onFileUpload(this.state.file);
     }
     reader.readAsText(file);
   }
