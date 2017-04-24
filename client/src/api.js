@@ -14,20 +14,21 @@ function handleError(err) {
   return null;
 }
 
-
-
 export default {
   getExchangeRates(base, symbols) {
     //get requirements
-    let dates = getDateRange();
-    let rates = [];
-    let promises = [];
-    let apiUrl = "http://api.fixer.io/";
+    let dates = [],
+        // promises = [],
+        apiUrl = "https://api.fixer.io/";
+
+    //get date range
+    for (let i = 1; i <= 30; i++) {
+      dates.push(moment().subtract(i,"d").format("YYYY-MM-DD"));
+    }
 
     //get formatted api urls
-    dates.map(date => {
-      let url = apiUrl + date + "?base=" + base + "&symbols=" + symbols;
-      return promises.push(axios.get(url));
+    let promises = dates.map(date => {
+      return axios.get(apiUrl + date + "?base=" + base + "&symbols=" + symbols);
     })
     //fetch exchange data
     return axios.all(promises)

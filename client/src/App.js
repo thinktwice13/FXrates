@@ -91,19 +91,13 @@ class App extends Component {
   getTblData() {
     //construct table data
     let { base, transactions, exchangeData } = this.state;
-    let tblArr = [];
-    exchangeData.map(entry => {
-      let obj = {
+    let tblArr = exchangeData.map(entry => {
+      return {
         date: entry.date,
         baseSum: Object.keys(transactions).reduce((a,tx) => {
           return a + transactions[tx] / +entry.rates[tx];
-        }, 0),
-        //FIXME: remove from loop!
-        converted: Object.keys(transactions).reduce((a,key) => {
-          return key !== base ? `${a}${transactions[key]} ${key}-` : a +"";
-        }, "").split("-").slice(0,-1)
-      }
-      tblArr.push(obj);
+        }, 0)
+      };
     })
     //remove duplicates
     tblArr = ((arr) => {

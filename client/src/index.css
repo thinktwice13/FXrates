@@ -20,18 +20,33 @@ body {
 table {
   width: 600px;
   margin: 30px 0;
-  border: 1px solid silver;
+  /*border: 1px solid silver;*/
   text-align: center;
 }
 
+.mainTbl th {
+  cursor: pointer;
+}
+
+.mainTbl th:hover {
+  color: #d0021b;
+}
+
 th {
-  background: silver;
-  padding: 5px;
+  /*background: silver;*/
+  width: 300px;
+  padding: 10px;
+  /*font-size: 1.2em;*/
+  font-weight: 900;
 }
 
 td {
   min-width: 100px;
-  padding: 5px;
+  padding: 10px 5px;
+}
+
+tr:not(:last-child) td {
+  border-bottom: 1px solid silver;
 }
 
 button {
@@ -44,7 +59,8 @@ input {
 
 .desc {
   width: 600px;
-  line-height: 1.7
+  line-height: 1.7;
+  text-align: center;
 }
 
 .data-src {
@@ -68,8 +84,12 @@ input {
 }
 
 .selector {
-  width: 600px;
+  width: 500px;
   display: flex;
   flex-wrap: nowrap;
   justify-content: space-around;
 }
+
+/*select {
+  background-color: silver;
+}*/

@@ -1,4 +1,7 @@
 import React, { Component } from 'react';
+import PropTypes from "prop-types";
+
+//TODO: add db save/laod btns, loading component, tbl sorting
 
 class Table extends Component {
   //TODO: table sorting
@@ -8,7 +11,7 @@ class Table extends Component {
     return (
       <div>
         <div>
-          <table>
+          <table className="convTbl">
             <tbody>
               <tr>
                 <th>Comverted</th>
@@ -18,7 +21,7 @@ class Table extends Component {
               </tr>
             </tbody>
           </table>
-          <table>
+          <table className="mainTbl">
             <tbody>
               <tr>
                 <th>Date</th>
