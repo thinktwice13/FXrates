@@ -4,6 +4,7 @@ class Table extends Component {
   //TODO: table sorting
   render() {
     let data = this.props.tableData;
+    console.log(data);
     return (
       <div>
         <div>

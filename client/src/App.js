@@ -22,8 +22,15 @@ class App extends Component {
 
   handleCurrChange(curr) {
     this.setState({ base: curr });
-    //TODO: recalculate exchange rates data
-    api.recalculateRates(curr, this.state.exchangeData)
+
+    this.state.exchangeData &&
+    this.state.exchangeData.map(item => {
+      item.base = curr;
+      let saved = item.rates[curr];
+      Object.keys(item.rates).map(rate => {
+        item.rates[rate] = Math.round((item.rates[rate]*10000) / saved) / 10000;
+      })
+    })
   }
 
   handleFileData(fileData) {
@@ -35,7 +42,6 @@ class App extends Component {
       //send file contents to server
       axios.post(this.props.url  + "/uploads", fileData)
       .catch(err => console.log(err));
-
       //summarize transaction data
       fileData.map(tx => {
         txSummary.hasOwnProperty(tx.currency) ?
@@ -46,9 +52,10 @@ class App extends Component {
       // delete txSummary.undefined;
 
       //get exchange rates
-      let currencies = Object.keys(txSummary).reduce((a,key) => {
-        return a + key + ",";
-      },"");
+      let currencies = Object.keys(txSummary).concat(this.props.currencies);
+      currencies = currencies.filter((el,pos) => {
+        return currencies.indexOf(el) == pos;
+      });
       api.getExchangeRates(this.state.base, currencies)
       .then(res => {
         res.map(item => {
@@ -132,15 +139,15 @@ class App extends Component {
             options={this.props.currencies} >
           </Switcher>
         </div>
-        { transactions && exchangeData &&
+        { base && transactions && exchangeData &&
           <Table
-            tableData={this.getTblData}
+            tableData={this.getTblData()}
             converted={Object.keys(transactions).reduce((a,key) => {
               return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
             }, "").slice(0,-4)} />
           }
           <p className="desc">
-            Accepts JSON file upload in <span><code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code></span> format.
+            Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.
             Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
           </p>
         </div>

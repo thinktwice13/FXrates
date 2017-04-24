@@ -29,28 +29,9 @@ export default {
       let url = apiUrl + date + "?base=" + base + "&symbols=" + symbols;
       return promises.push(axios.get(url));
     })
-
     //fetch exchange data
-    axios.all(promises)
-      .then(res => {
-        res.map(item => {
-          item.data.timestamp = +item.data.date.split("-").join("");
-          item.data.rates[item.data.base] = 1.0;
-          return rates.push(item.data)
-        })
-      })
-      .catch(handleError)
-      return Promise.resolve(rates);
-  },
-  recalculateRates(base, fxdata) {
-    //recalculate exchange rates for new base currency
-    return fxdata && 
-    fxdata.map(item => {
-      item.base = base;
-      let saved = item.rates[base];
-      Object.keys(item.rates).map(rate => {
-        item.rates[rate] = Math.round((item.rates[rate]*10000) / saved) / 10000;
-      })
-    })
+    return axios.all(promises)
+      .then(res => { return res })
+      .catch(handleError);
   }
 }
