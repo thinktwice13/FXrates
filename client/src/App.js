@@ -1,9 +1,37 @@
 import React, { Component } from 'react';
 import axios from "axios";
 import api from "./api";
-import Table from "./Table";
 import FileUpload from "./FileUpload";
-import Switcher from "./Switcher";
+import Table from "./Table";
+import Loading from "./Loading" ;
+
+//TODO: add db save/laod options
+
+//err messages
+function Msg(props) {
+  return (
+    <p className="loader">{props.text}</p>
+  )
+}
+
+//currency switcher
+function Switcher(props) {
+  const currs = props.currencies;
+  return (
+    <ul className="currs">
+      {currs.map(curr => {
+        return (
+          <li
+            className={curr === props.selectedCurr ? "selected" : null}
+            onClick={props.onCurrChange.bind(null, curr)}
+            key={curr}>
+            {curr}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
 
 class App extends Component {
   constructor(props) {
@@ -13,6 +41,7 @@ class App extends Component {
       base: this.props.currencies[0],
       transactions: null,
       fxData: null,
+      msg: null
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
@@ -21,8 +50,11 @@ class App extends Component {
   }
 
   handleCurrChange(base) {
-    this.setState({ base: base });
+    //stop if no change in chosen currency
+    if (base === this.state.base) return;
 
+    console.log("Switching currency.");
+    //recalculate rates for the new base currency
     let fxData = this.state.fxData;
     fxData && fxData.forEach(item => {
       item.base = base;
@@ -31,34 +63,44 @@ class App extends Component {
         item.rates[curr] = Math.round((item.rates[curr]*10000) / saved) / 10000;
       })
     })
-    //QUESTION: not needed? allowed?
-    this.setState({ fxData });
+    this.setState({ base, fxData });
   }
 
   handleFileData(fileData) {
-    this.setState({fxData: null})
-    let txSummary = {};
-    let rates = [];
-    console.log(fileData);
-    if (fileData) {
-      console.log("Setting txs");
-      //send file contents to server
+    //if there is a message instead of a file
+    if (fileData.msg) {
+      this.setState({
+        msg: fileData.msg,
+        transactions: null
+      });
+    }
+    //if valid file sent
+    else {
+      //clear message
+      let msg = null;
+      let txSummary = {};
+      let rates = [];
+
+      //send transactions to server
       axios.post(this.props.url  + "/uploads", fileData)
+      //TODO: show success/failure in client
+      .then(res => console.log("Transactions saved! ( /transactions )"))
       .catch(err => console.log(err));
-      //summarize transaction data
-      fileData.map(tx => {
+
+      //summarize transactions
+      fileData.forEach(tx => {
         txSummary.hasOwnProperty(tx.currency) ?
         txSummary[tx.currency] += +tx.amount :
         txSummary[tx.currency] = +tx.amount;
       });
-      //temp fix
-      // delete txSummary.undefined;
 
-      //get exchange rates
+      //get combined unique currencies from transactions and switcher
       let currencies = Object.keys(txSummary).concat(this.props.currencies);
       currencies = currencies.filter((el,pos) => {
         return currencies.indexOf(el) == pos;
       });
+
+      //get exchange rates
       api.getExchangeRates(this.state.base, currencies)
       .then(res => {
         res.map(item => {
@@ -67,30 +109,29 @@ class App extends Component {
           rates.push(item.data);
         })
 
-        //filter transactions (remove currencies without rates data or undefined)
+        //filter transactions (remove currencies without api results or undefined)
         txSummary = Object.keys(txSummary)
-        .filter(key => Object.keys(res[0].data.rates).includes(key))
-        .reduce((obj, key) => {
-          obj[key] = txSummary[key];
-          return obj;
-        },{});
+          .filter(key => Object.keys(res[0].data.rates).includes(key))
+          .reduce((obj, key) => {
+            obj[key] = txSummary[key];
+            return obj;
+          },{});
+
         this.setState({
+          msg,
           transactions: txSummary,
           fxData: rates
         });
-      });
-    } else {
-      this.setState({
-        transactions: null
       });
     }
   }
 
   getTblData() {
+    console.log("Getting table data.");
     //construct table data
     let { base, transactions, fxData } = this.state;
 
-    //get converted curencies
+    //get all currencies (exclude base)
     let converted = Object.keys(transactions).reduce((a,key) => {
       return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
     }, "").slice(0,-4);
@@ -103,9 +144,10 @@ class App extends Component {
           return a + transactions[tx] / +entry.rates[tx];
         }, 0)
       };
-    })
-    //remove duplicates
+    });
+
     //FIXME: reduce???
+    //remove duplicates from table rows
     rows = ((arr) => {
       let tmp = [];
       for (let i = 0; i < arr.length-1; i++) {
@@ -113,6 +155,7 @@ class App extends Component {
       }
       return tmp;
     })(rows);
+
     //sort by sum amount
     rows.sort((a, b) => { return b.sum -  a.sum }).length = 5;
     //sort by date
@@ -122,7 +165,8 @@ class App extends Component {
     //   else return 0;
     // });
     //round and stringify
-    rows.forEach(item => { item.sum = (Math.round(100 * item.sum) / 100).toFixed(2) + " " + base;  });
+    rows.forEach(item => { item.sum = (Math.round(100*item.sum)/100).toFixed(2) + " " + base;  });
+
     return {
       rows,
       converted
@@ -130,6 +174,8 @@ class App extends Component {
   }
 
   render() {
+    console.log("Rendering app.");
+
     return (
       <div className="app">
         <div className="selector">
@@ -138,14 +184,16 @@ class App extends Component {
           </FileUpload>
           <Switcher
             onCurrChange={this.handleCurrChange}
-            options={this.props.currencies} >
+            currencies={this.props.currencies} >
           </Switcher>
         </div>
-
-        { this.state.transactions ?
-          !this.state.fxData ?
-            console.log("test loading") :
-            <Table tableData={this.getTblData()} /> : null
+        { this.state.msg ?
+          <Msg text={this.state.msg} /> :
+            this.state.transactions ?
+            !this.state.fxData ?
+            <Loading /> :
+              <Table tableData={this.getTblData()} /> :
+                null
         }
           <p className="desc">
             Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.

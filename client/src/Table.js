@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from "prop-types";
 
-//TODO: add db save/laod btns, loading component, tbl sorting
-
 class Table extends Component {
   constructor(props) {
     super(props);
@@ -28,12 +26,13 @@ class Table extends Component {
   }
 
   sortTbl(col) {
-    console.log("Sorting by ", this.state.sortBy, this.state.sortDir, this.state.data[0].sum);
+    console.log("Sorting table");
+
     let sortBy = col || this.state.sortBy;
     let sortDir = this.state.sortDir;
 
+    //determine sort direction on click
     if (col) {
-      //determine rort direction
       if (sortBy === this.state.sortBy) {
         sortDir = this.state.sortDir === "asc" ? "desc" : "asc";
       } else sortDir = "desc";
@@ -56,9 +55,9 @@ class Table extends Component {
   }
 
   render() {
+    console.log("Rendering Table.");
     //setup sorting arrow
-    let sortDirArrow = this.state.sortDir === "desc" ? " ↓" : " ↑";
-    console.log("Rendering table ", this.state.sortBy);
+    let sortDirArrow = this.state.sortDir === "desc" ? " ▼" : " ▲";
 
     return (
       <div>
