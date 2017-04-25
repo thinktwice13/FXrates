@@ -12,7 +12,7 @@ class App extends Component {
     this.state = {
       base: this.props.currencies[0],
       transactions: null,
-      exchangeData: null
+      fxData: null,
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
@@ -20,20 +20,23 @@ class App extends Component {
     this.getTblData = this.getTblData.bind(this);
   }
 
-  handleCurrChange(curr) {
-    this.setState({ base: curr });
+  handleCurrChange(base) {
+    this.setState({ base: base });
 
-    this.state.exchangeData &&
-    this.state.exchangeData.map(item => {
-      item.base = curr;
-      let saved = item.rates[curr];
-      Object.keys(item.rates).map(rate => {
-        item.rates[rate] = Math.round((item.rates[rate]*10000) / saved) / 10000;
+    let fxData = this.state.fxData;
+    fxData && fxData.forEach(item => {
+      item.base = base;
+      let saved = item.rates[base];
+      Object.keys(item.rates).forEach(curr => {
+        item.rates[curr] = Math.round((item.rates[curr]*10000) / saved) / 10000;
       })
     })
+    //QUESTION: not needed? allowed?
+    this.setState({ fxData });
   }
 
   handleFileData(fileData) {
+    this.setState({fxData: null})
     let txSummary = {};
     let rates = [];
     console.log(fileData);
@@ -73,24 +76,27 @@ class App extends Component {
         },{});
         this.setState({
           transactions: txSummary,
-          exchangeData: rates
+          fxData: rates
         });
       });
-    }
-    else {
-      console.log("setting null state");
+    } else {
       this.setState({
-        transactions: null,
-        exchangeData: null
+        transactions: null
       });
     }
   }
 
   getTblData() {
-    console.log("getting table data");
     //construct table data
-    let { base, transactions, exchangeData } = this.state;
-    let tblArr = exchangeData.map(entry => {
+    let { base, transactions, fxData } = this.state;
+
+    //get converted curencies
+    let converted = Object.keys(transactions).reduce((a,key) => {
+      return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
+    }, "").slice(0,-4);
+
+    //get table rows
+    let rows = fxData.map(entry => {
       return {
         date: entry.date,
         sum: Object.keys(transactions).reduce((a,tx) => {
@@ -99,28 +105,31 @@ class App extends Component {
       };
     })
     //remove duplicates
-    tblArr = ((arr) => {
+    //FIXME: reduce???
+    rows = ((arr) => {
       let tmp = [];
       for (let i = 0; i < arr.length-1; i++) {
         (arr[i].date !== arr[i+1].date) ? tmp.push(arr[i]) : null;
       }
       return tmp;
-    })(tblArr);
+    })(rows);
     //sort by sum amount
-    tblArr.sort((a, b) => { return b.sum -  a.sum }).length = 5;
+    rows.sort((a, b) => { return b.sum -  a.sum }).length = 5;
     //sort by date
-    tblArr.sort((a, b) => {
-      if (b.date > a.date) return 1
-      else if (b.date < a.date) return -1
-      else return 0;
-    });
+    // rows.sort((a, b) => {
+    //   if (b.date > a.date) return 1
+    //   else if (b.date < a.date) return -1
+    //   else return 0;
+    // });
     //round and stringify
-    tblArr.forEach(item => { item.sum = (Math.round(100 * item.sum) / 100).toFixed(2) + " " + base;  });
-    return tblArr;
+    rows.forEach(item => { item.sum = (Math.round(100 * item.sum) / 100).toFixed(2) + " " + base;  });
+    return {
+      rows,
+      converted
+    }
   }
 
   render() {
-    let { base, exchangeData, transactions } = this.state;
     return (
       <div className="app">
         <div className="selector">
@@ -132,13 +141,12 @@ class App extends Component {
             options={this.props.currencies} >
           </Switcher>
         </div>
-        { base && transactions && exchangeData &&
-          <Table
-            tableData={this.getTblData()}
-            converted={Object.keys(transactions).reduce((a,key) => {
-              return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
-            }, "").slice(0,-4)} />
-          }
+
+        { this.state.transactions ?
+          !this.state.fxData ?
+            console.log("test loading") :
+            <Table tableData={this.getTblData()} /> : null
+        }
           <p className="desc">
             Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.
             Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.

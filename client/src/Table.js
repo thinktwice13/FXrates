@@ -8,20 +8,39 @@ class Table extends Component {
     super(props);
     this.data = this.props.tableData;
     this.state = {
+      data: props.tableData.rows,
+      converted: props.tableData.converted,
       sortBy: "date",
       sortDir: "desc"
     }
   }
 
-  sortTbl(col) {
-    console.log("sorting by ", col);
-    let sortDir = this.state.sortDir;
-    let sortBy = col;
-    if (sortBy === this.state.sortBy) {
-      sortDir = this.state.sortDir === "asc" ? "desc" : "asc";
-    } else sortDir = "desc";
+  componentWillMount() {
+    //initial sort
+    this.sortTbl();
+  }
 
-    this.data = this.data.sort((a,b) => {
+  componentWillReceiveProps(nextProps) {
+    this.setState({
+      data: nextProps.tableData.rows,
+      converted: nextProps.tableData.converted
+    }, this.sortTbl);
+  }
+
+  sortTbl(col) {
+    console.log("Sorting by ", this.state.sortBy, this.state.sortDir, this.state.data[0].sum);
+    let sortBy = col || this.state.sortBy;
+    let sortDir = this.state.sortDir;
+
+    if (col) {
+      //determine rort direction
+      if (sortBy === this.state.sortBy) {
+        sortDir = this.state.sortDir === "asc" ? "desc" : "asc";
+      } else sortDir = "desc";
+    }
+
+    //sort rows
+    let data = this.state.data.sort((a,b) => {
       let sortVal = 0;
       if (a[sortBy] > b[sortBy]) sortVal = 1;
       if (a[sortBy] < b[sortBy]) sortVal = -1;
@@ -31,11 +50,13 @@ class Table extends Component {
 
     this.setState({
       sortBy,
-      sortDir
+      sortDir,
+      data
     })
   }
 
   render() {
+    //setup sorting arrow
     let sortDirArrow = this.state.sortDir === "desc" ? " ↓" : " ↑";
     console.log("Rendering table ", this.state.sortBy);
 
@@ -48,7 +69,7 @@ class Table extends Component {
                 <th>Comverted</th>
               </tr>
               <tr>
-                <td>{this.props.converted}</td>
+                <td>{this.state.converted}</td>
               </tr>
             </tbody>
           </table>
@@ -58,7 +79,7 @@ class Table extends Component {
                 <th
                   id="date"
                   onClick={this.sortTbl.bind(this, "date")}
-                  style={this.state.sortBy === "date" ? {color:"#d0021b"} : null}>
+                  className={this.state.sortBy === "date" ? "selected" : null}>
                   {"Date"+ (this.state.sortBy === "date" ? sortDirArrow : "")}
                 </th>
                 <th
@@ -68,7 +89,13 @@ class Table extends Component {
                   {"Sum"+ (this.state.sortBy === "sum" ? sortDirArrow : "")}
                 </th>
               </tr>
-              {this.data.map((entry,i)  => {
+              <tr>
+                <th
+              className={this.state.sortBy === "sum" ? "selected" : null} >
+              {"Sum"+ (this.state.sortBy === "sum" ? sortDirArrow : "")}
+                </th>
+              </tr>
+              {this.state.data.map((entry,i)  => {
                 return <tr key={i}>
                   <td>{entry.date}</td>
                   <td>{entry.sum}</td>
@@ -81,6 +108,10 @@ class Table extends Component {
       </div>
     )
   }
+}
+
+Table.propTypes = {
+  tableData: PropTypes.object.isRequired
 }
 
 export default Table;
