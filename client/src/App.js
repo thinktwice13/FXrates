@@ -84,17 +84,16 @@ class App extends Component {
         exchangeData: null
       });
     }
-
-
   }
 
   getTblData() {
+    console.log("getting table data");
     //construct table data
     let { base, transactions, exchangeData } = this.state;
     let tblArr = exchangeData.map(entry => {
       return {
         date: entry.date,
-        baseSum: Object.keys(transactions).reduce((a,tx) => {
+        sum: Object.keys(transactions).reduce((a,tx) => {
           return a + transactions[tx] / +entry.rates[tx];
         }, 0)
       };
@@ -108,7 +107,7 @@ class App extends Component {
       return tmp;
     })(tblArr);
     //sort by sum amount
-    tblArr.sort((a, b) => { return b.baseSum -  a.baseSum }).length = 5;
+    tblArr.sort((a, b) => { return b.sum -  a.sum }).length = 5;
     //sort by date
     tblArr.sort((a, b) => {
       if (b.date > a.date) return 1
@@ -116,7 +115,7 @@ class App extends Component {
       else return 0;
     });
     //round and stringify
-    tblArr.map(item => { item.baseSum = (Math.round(100 * item.baseSum) / 100).toFixed(2) + " " + base;  });
+    tblArr.forEach(item => { item.sum = (Math.round(100 * item.sum) / 100).toFixed(2) + " " + base;  });
     return tblArr;
   }
 

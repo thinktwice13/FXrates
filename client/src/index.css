@@ -28,10 +28,6 @@ table {
   cursor: pointer;
 }
 
-.mainTbl th:hover {
-  color: #d0021b;
-}
-
 th {
   /*background: silver;*/
   width: 300px;

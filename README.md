@@ -9,7 +9,6 @@ App hosted on [Heroku](https://fxrates-5697.herokuapp.com/)
 
 TODO:
 * validate file contents format
-* table sorting
 * add database save/load btn
 * prop-types
 * cleanup warnings
