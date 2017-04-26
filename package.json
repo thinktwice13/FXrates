@@ -22,22 +22,24 @@
     "body-parser": "~1.17.1",
     "dotenv": "^4.0.0",
     "express": "~4.15.2",
+    "global": "^4.3.2",
+    "mocha": "^3.2.0",
     "mongoose": "~4.9.5"
   },
   "devDependencies": {
     "concurrently": "~3.4.0",
-    "nodemon": "~1.11.0",
     "eslint": "3.15.0",
     "eslint-config-airbnb": "14.1.0",
     "eslint-plugin-import": "2.2.0",
     "eslint-plugin-jsx-a11y": "4.0.0",
-    "eslint-plugin-react": "6.9.0"
+    "eslint-plugin-react": "6.9.0",
+    "nodemon": "~1.11.0"
   },
   "scripts": {
     "server": "nodemon server",
     "start-dev": "concurrently \"npm run server\" \"cd client/ && npm start\"",
     "heroku-postbuild": "npm i && cd client/ && npm i --only=dev && npm i && npm run build",
-    "build": "npm i && cd client/ && npm i && npm run build && cd .. && concurrently \"npm run server\" \"cd client/ && serve -s build\""
+    "build": "npm i && cd client/ && npm i && npm run build && cd .. && concurrently \"npm run server\" \"serve -s client/build\""
   },
   "cacheDirectories": [
     "node_modules",

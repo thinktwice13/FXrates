@@ -1,19 +1,6 @@
 import axios from "axios";
 import moment from "moment";
 
-function getDateRange() {
-  let dates = [];
-  for (let i = 1; i <= 30; i++) {
-    dates.push(moment().subtract(i,"d").format("YYYY-MM-DD"));
-  }
-  return dates;
-}
-
-function handleError(err) {
-  console.log(err);
-  return null;
-}
-
 export default {
   getExchangeRates(base, symbols) {
     //get requirements
@@ -30,9 +17,10 @@ export default {
     let promises = dates.map(date => {
       return axios.get(apiUrl + date + "?base=" + base + "&symbols=" + symbols);
     })
+
     //fetch exchange data
     return axios.all(promises)
       .then(res => { return res })
-      .catch(handleError);
+      .catch(err => console.log(err));
   }
 }

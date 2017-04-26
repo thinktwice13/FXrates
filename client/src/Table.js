@@ -4,7 +4,6 @@ import PropTypes from "prop-types";
 class Table extends Component {
   constructor(props) {
     super(props);
-    this.data = this.props.tableData;
     this.state = {
       data: props.tableData.rows,
       converted: props.tableData.converted,
@@ -65,13 +64,14 @@ class Table extends Component {
           <table className="convTbl">
             <tbody>
               <tr>
-                <th>Comverted</th>
+                <th>Converted</th>
               </tr>
               <tr>
                 <td>{this.state.converted}</td>
               </tr>
             </tbody>
           </table>
+
           <table className="mainTbl">
             <tbody>
               <tr>
@@ -84,14 +84,8 @@ class Table extends Component {
                 <th
                   id="sum"
                   onClick={this.sortTbl.bind(this, "sum")}
-                  style={this.state.sortBy === "sum" ? {color:"#d0021b"} : null}>
+                  className={this.state.sortBy === "sum" ? "selected" : null}>
                   {"Sum"+ (this.state.sortBy === "sum" ? sortDirArrow : "")}
-                </th>
-              </tr>
-              <tr>
-                <th
-              className={this.state.sortBy === "sum" ? "selected" : null} >
-              {"Sum"+ (this.state.sortBy === "sum" ? sortDirArrow : "")}
                 </th>
               </tr>
               {this.state.data.map((entry,i)  => {

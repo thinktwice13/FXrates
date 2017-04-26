@@ -97,13 +97,13 @@ class App extends Component {
       //get combined unique currencies from transactions and switcher
       let currencies = Object.keys(txSummary).concat(this.props.currencies);
       currencies = currencies.filter((el,pos) => {
-        return currencies.indexOf(el) == pos;
+        return currencies.indexOf(el) === pos;
       });
 
       //get exchange rates
       api.getExchangeRates(this.state.base, currencies)
       .then(res => {
-        res.map(item => {
+        res.forEach(item => {
           //add chosen currency rate
           item.data.rates[item.data.base] = 1.0;
           rates.push(item.data);
@@ -158,12 +158,7 @@ class App extends Component {
 
     //sort by sum amount
     rows.sort((a, b) => { return b.sum -  a.sum }).length = 5;
-    //sort by date
-    // rows.sort((a, b) => {
-    //   if (b.date > a.date) return 1
-    //   else if (b.date < a.date) return -1
-    //   else return 0;
-    // });
+
     //round and stringify
     rows.forEach(item => { item.sum = (Math.round(100*item.sum)/100).toFixed(2) + " " + base;  });
 
@@ -183,8 +178,9 @@ class App extends Component {
             onFileUpload={this.handleFileData}>
           </FileUpload>
           <Switcher
-            onCurrChange={this.handleCurrChange}
-            currencies={this.props.currencies} >
+            currencies={this.props.currencies}
+            selectedCurr={this.state.base}
+            onCurrChange={this.handleCurrChange} >
           </Switcher>
         </div>
         { this.state.msg ?
@@ -199,8 +195,8 @@ class App extends Component {
             Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.
             Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
           </p>
-        </div>
-      );
+      </div>
+    )
   }
 }
 

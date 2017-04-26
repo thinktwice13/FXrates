@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from "prop-types";
 
 class FileUpload extends Component {
   constructor(props) {
@@ -59,6 +60,10 @@ class FileUpload extends Component {
       </ul>
     )
   }
+}
+
+FileUpload.propTypes = {
+  onFileUpload: PropTypes.func.isRequired
 }
 
 export default FileUpload;

@@ -1,5 +1,5 @@
 * {
-    outline: 1px solid black;
+    /*outline: 1px solid black;*/
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     -ms-box-sizing: border-box;
@@ -15,6 +15,7 @@ body {
     "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
     "Fira Sans", "Droid Sans", "Helvetica Neue",
     sans-serif;
+  font-weight: 300;
 }
 
 table {
@@ -66,9 +67,9 @@ li {
 }
 
 .selector {
-  width: 500px;
+  width: 600px;
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
   justify-content: space-around;
   margin: 10px;
 }
