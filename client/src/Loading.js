@@ -11,7 +11,7 @@ class Loading extends Component {
   componentDidMount() {
 
     //loading dots animation
-    let stopper = this.props.text + "...";
+    const stopper = this.props.text + "...";
     this.interval = window.setInterval(() => {
       if (this.state.text === stopper) {
         this.setState({ text: this.props.text });

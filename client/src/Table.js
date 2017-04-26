@@ -28,7 +28,7 @@ class Table extends Component {
   sortTbl(col) {
     console.log("Sorting table");
 
-    let sortBy = col || this.state.sortBy;
+    const sortBy = col || this.state.sortBy;
     let sortDir = this.state.sortDir;
 
     //determine sort direction on click
@@ -39,7 +39,7 @@ class Table extends Component {
     }
 
     //sort rows
-    let data = this.state.data.sort((a,b) => {
+    const data = this.state.data.sort((a,b) => {
       let sortVal = 0;
       if (a[sortBy] > b[sortBy]) sortVal = 1;
       if (a[sortBy] < b[sortBy]) sortVal = -1;
@@ -57,7 +57,7 @@ class Table extends Component {
   render() {
     console.log("Rendering Table.");
     //setup sorting arrow
-    let sortDirArrow = this.state.sortDir === "desc" ? " ▼" : " ▲";
+    const sortDirArrow = this.state.sortDir === "desc" ? " ▼" : " ▲";
 
     return (
       <div>

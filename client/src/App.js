@@ -18,7 +18,7 @@ function Msg(props) {
 function Switcher(props) {
   const currs = props.currencies;
   return (
-    <ul className="currs">
+    <ul className="hlist">
       {currs.map(curr => {
         return (
           <li
@@ -58,7 +58,7 @@ class App extends Component {
     let fxData = this.state.fxData;
     fxData && fxData.forEach(item => {
       item.base = base;
-      let saved = item.rates[base];
+      const saved = item.rates[base];
       Object.keys(item.rates).forEach(curr => {
         item.rates[curr] = Math.round((item.rates[curr]*10000) / saved) / 10000;
       })
@@ -129,11 +129,11 @@ class App extends Component {
   getTblData() {
     console.log("Getting table data.");
     //construct table data
-    let { base, transactions, fxData } = this.state;
+    const { base, transactions, fxData } = this.state;
 
     //get all currencies (exclude base)
-    let converted = Object.keys(transactions).reduce((a,key) => {
-      return key !== base ? a+Math.round(100*transactions[key])/100 +" "+key+",   " : a +"";
+    const converted = Object.keys(transactions).reduce((a,key) => {
+      return key !== base ? a+(Math.round(100*transactions[key])/100).toFixed(2) +" "+key+",   " : a +"";
     }, "").slice(0,-4);
 
     //get table rows
