@@ -37,7 +37,7 @@ class Loading extends Component {
 }
 
 Loading.defaultProps = {
-  text: " ",
+  text: "",
   speed: 200
 }
 

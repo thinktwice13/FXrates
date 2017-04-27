@@ -10,7 +10,6 @@ class Table extends Component {
       sortBy: "date",
       sortDir: "desc"
     }
-
     this.sortTbl = this.sortTbl.bind(this);
   }
 
@@ -27,6 +26,7 @@ class Table extends Component {
   }
 
   sortTbl(e) {
+    //FIXME: review!
     //determine sorting column and direction
     let sortBy = (e && e.target.id) || this.state.sortBy;
     let sortDir = (e && e.deltaY) || this.state.sortDir;
@@ -39,7 +39,7 @@ class Table extends Component {
         } else return "desc";
       })();
     }
-    //exit if no sorting needed
+    //exit if sorting triggered by an event but is unnecessary
     if (e && sortBy === this.state.sortBy && sortDir === this.state.sortDir) return;
 
     //sort rows
@@ -59,7 +59,7 @@ class Table extends Component {
   }
 
   render() {
-    //setup sorting arrow
+    //sets sorting arrow
     const sortDirArrow = this.state.sortDir === "desc" ? " ▼" : " ▲";
 
     return (
@@ -68,7 +68,7 @@ class Table extends Component {
           <table>
             <tbody>
               <tr>
-                <th>Converted</th>
+                <th id="conv">Converted</th>
               </tr>
               <tr>
                 <td>{this.state.converted}</td>

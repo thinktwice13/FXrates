@@ -32,8 +32,8 @@ app.use((req, res, next) => {
 app.get("/", (req, res) => res.send("Hello"));
 app.get("/transactions/", (req, res) => {
   Transaction.find((err, transaction) => {
-    if (err) res.send(err);
-    res.json(transaction);
+    if (err) res.send(err)
+    else res.json(transaction);
   });
 });
 app.post("/uploads/", (req, res) => {
@@ -44,10 +44,10 @@ app.post("/uploads/", (req, res) => {
       amount: item.amount
     });
     transaction.save(err => {
-      if (err) res.send(err);
+      if (err) res.send(err)
     })
   })
-  res.send("Transactions saved!");
+  res.send("Transactions successfully saved to database.");
 })
 
 app.listen(app.get("port"), () => console.log("Server listening on port " + app.get("port") + "."));

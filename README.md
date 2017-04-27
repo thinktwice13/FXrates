@@ -6,9 +6,5 @@ Run **npm run build** for local production build. Open on **localhost:5000**
 
 App hosted on [Heroku](https://fxrates-5697.herokuapp.com/)
 
-
-TODO:
-* add database save button
-
 --------
 Using [fixer.io](fixer.io) data

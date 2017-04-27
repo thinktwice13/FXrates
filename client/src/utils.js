@@ -4,14 +4,14 @@ import moment from "moment";
 export default {
   getFxData(base, currs, txData) {
     let txSum = {};
-    //summarize transactions
+    //summarize transactions {"EUR":123, "USD":456, ...}
     txData.forEach(tx => {
       txSum.hasOwnProperty(tx.currency) ?
       txSum[tx.currency] += +tx.amount :
       txSum[tx.currency] = +tx.amount;
     });
 
-    //get combined unique currencies from transactions and switcher
+    //get unique combined currencies from transactions and switcher options
     let symbols = Object.keys(txSum).concat(currs);
     currs = currs.filter((el,pos) => {
       return currs.indexOf(el) === pos;
@@ -24,11 +24,11 @@ export default {
     for (let i = 1; i <= 30; i++) {
       dates.push(moment().subtract(i,"d").format("YYYY-MM-DD"));
     }
-    //format api urls
+    //get array of api calls
     let promises = dates.map(date => {
       return axios.get(apiUrl + date + "?base=" + base + "&symbols=" + symbols);
     })
-    //fetch exchange data
+    //fetch exchange data and return to app.handleDataLoad
     return axios.all(promises)
     .then(apiRates => {
       let rates = [];
@@ -49,8 +49,8 @@ export default {
       },{});
 
       return {
-        txSum,
-        rates
+        txSum,      //obj {"EUR":123,"USD":456, ...}
+        rates       //api results array [{base,date,rates:{}}, ...]
       }
     })
     .catch(err => console.log(err));

@@ -54,6 +54,9 @@ th {
   font-weight: 900;
   transition: $highlightOut;
   cursor: pointer;
+  &#conv {
+    cursor: auto;
+  }
 }
 
 li {
@@ -70,12 +73,13 @@ li {
   display:flex;
   flex-wrap: wrap;
   justify-content: center;
+  margin: 10px;
   li {
-    margin: 2px;
+    margin: 5px;
     padding: 8px;
     font-weight: 700;
     cursor: pointer;
-    text-transform: capitalize;
+    // text-transform: capitalize;
     transition: $highlightOut;
   }
 }
@@ -122,6 +126,10 @@ li {
   background-color: $bckClr;
   border-radius: 4px;
   transition: $highlightIn;
+}
+
+.disabled {
+  color: #ccc;
 }
 
 .desc {

@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Inputs from "./Inputs";
 import Table from "./Table";
 import Loading from "./Loading" ;
-import axios from "axios";
 import utils from "./utils";
 
 //err messages
@@ -22,7 +21,7 @@ class App extends Component {
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
-    this.handleTxLoad = this.handleTxLoad.bind(this);
+    this.handlaDataLoad = this.handlaDataLoad.bind(this);
     this.getTblData = this.getTblData.bind(this);
   }
 
@@ -31,7 +30,7 @@ class App extends Component {
     if (base === this.state.base) return;
 
     console.log("Switching currency.");
-    //recalculate rates for the new base currency
+    //recalculate rates with the new base currency
     let fxData = this.state.fxData;
     fxData && fxData.forEach(item => {
       item.base = base;
@@ -43,18 +42,18 @@ class App extends Component {
     this.setState({ base, fxData });
   }
 
-  handleTxLoad(txData) {
-    console.log("Loading transactions.");
+  handlaDataLoad(txData) {
+    console.log("Loading transactions");
 
-    //if error reading file
+    //sets display message if error reading file
     if (txData.msg) return this.setState({ msg: txData.msg, transactions: null});
 
-    //if valid data
     //if loading transactions from DB
     if (txData === "db") {
       this.setState({ msg: "..." });
       //get transactions from db
       utils.getTxData(this.props.url + "/transactions")
+      //get ecxhange rates
       .then(txData => {
         return utils.getFxData(this.state.base, this.props.currencies, txData)
       })
@@ -68,11 +67,6 @@ class App extends Component {
     }
     //if loading transactions data from file
     else {
-      //save transactions to database
-      axios.post(this.props.url + "/uploads", txData)
-      .then(console.log("Transactions saved. (/transactions)"))
-      .catch(err => console.log(err));
-
       //get exchange rates
       utils.getFxData(this.state.base, this.props.currencies, txData)
       .then(data => {
@@ -105,15 +99,10 @@ class App extends Component {
       };
     });
 
-    //FIXME: reduce???
     //remove duplicates from table rows
-    rows = ((arr) => {
-      let tmp = [];
-      for (let i = 0; i < arr.length-1; i++) {
-        (arr[i].date !== arr[i+1].date) ? tmp.push(arr[i]) : null;
-      }
-      return tmp;
-    })(rows);
+    rows = rows.filter((el,i) => {
+      return rows[i].date !== (rows[i-1] && rows[i-1].date);
+    });
 
     //sort by sum amount
     rows.sort((a, b) => { return b.sum -  a.sum }).length = 5;
@@ -122,8 +111,8 @@ class App extends Component {
     rows.forEach(item => { item.sum = (Math.round(100*item.sum)/100).toFixed(2) + " " + base;  });
 
     return {
-      rows,
-      converted
+      rows,       //array [{date:xxx, sum:000}, ...]
+      converted   //string "123 EUR, 456 USD, ..."
     }
   }
 
@@ -134,8 +123,9 @@ class App extends Component {
         <Inputs
           selectedCurr={this.state.base}
           currencies={this.props.currencies}
+          url={this.props.url}
           onCurrChange={this.handleCurrChange}
-          onDataLoad={this.handleTxLoad} >
+          onDataLoad={this.handlaDataLoad} >
         </Inputs>
         { msg ?
           msg === "..." ?
