@@ -1,0 +1,152 @@
+$app-width: 600px;
+$bckClr: #eee;
+$redClr: #d1021b;
+$highlightIn: background-color 0s;
+$highlightOut: background-color 0s;
+
+* {
+    // outline: 1px solid black;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+body, html {
+  font-family: -apple-system, BlinkMacSystemFont,
+    "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell",
+    "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  font-weight: 400;
+  text-align: center;
+}
+
+.app {
+  width: $app-width;
+  margin: 75px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+table {
+  width: $app-width;
+  margin: 30px 0;
+}
+
+tr > * {
+  min-width: 150px;
+  padding: 6px 8px;
+  width: ($app-width / 2);
+  line-height: 1.8;
+}
+
+tr:not(:last-child) td {
+  border-bottom: 1px solid $bckClr;
+}
+
+th {
+  font-size: 1.2em;
+  font-weight: 900;
+  transition: $highlightOut;
+  cursor: pointer;
+}
+
+li {
+  list-style: none;
+}
+
+.inputs {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.hlist {
+  display:flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  li {
+    margin: 2px;
+    padding: 8px;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: capitalize;
+    transition: $highlightOut;
+  }
+}
+
+.hlist + .hlist {
+  margin: 0 2px;
+}
+
+.btn li {
+  width: 135px;
+}
+
+#fileinput {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+#fileinput + li {
+  padding: 0;
+  cursor: default;
+  // width: 135px;
+  text-transform: none;
+  & > * {
+    cursor: pointer;
+  }
+  label {
+    padding: 8px;
+    display: block;
+    height: 100%;
+    p {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+}
+
+.active {
+  color: $redClr;
+  background-color: $bckClr;
+  border-radius: 4px;
+  transition: $highlightIn;
+}
+
+.desc {
+  width: 600px;
+  line-height: 1.7;
+  text-align: center;
+  padding: 10px;
+}
+
+.data-src {
+  margin: 0 0 20px 0;
+  font-size: 13px;
+  text-align: center;
+  a {
+    font-weight: bold;
+    text-decoration: none;
+    color: #d1021b;
+    background-color: $bckClr;
+    padding: 4px;
+    border-radius: 3px;
+  }
+}
+
+.msg {
+  font-size: 2.5em;
+  line-height: 480px;
+  height: 480px;
+}

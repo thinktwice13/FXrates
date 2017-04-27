@@ -1,36 +1,13 @@
 import React, { Component } from 'react';
-import axios from "axios";
-import api from "./api";
-import FileUpload from "./FileUpload";
+import Inputs from "./Inputs";
 import Table from "./Table";
 import Loading from "./Loading" ;
-
-//TODO: add db save/laod options
+import axios from "axios";
+import utils from "./utils";
 
 //err messages
 function Msg(props) {
-  return (
-    <p className="loader">{props.text}</p>
-  )
-}
-
-//currency switcher
-function Switcher(props) {
-  const currs = props.currencies;
-  return (
-    <ul className="hlist">
-      {currs.map(curr => {
-        return (
-          <li
-            className={curr === props.selectedCurr ? "selected" : null}
-            onClick={props.onCurrChange.bind(null, curr)}
-            key={curr}>
-            {curr}
-          </li>
-        )
-      })}
-    </ul>
-  )
+  return ( <p className="msg">{props.text}</p> )
 }
 
 class App extends Component {
@@ -45,7 +22,7 @@ class App extends Component {
     }
 
     this.handleCurrChange = this.handleCurrChange.bind(this);
-    this.handleFileData = this.handleFileData.bind(this);
+    this.handleTxLoad = this.handleTxLoad.bind(this);
     this.getTblData = this.getTblData.bind(this);
   }
 
@@ -66,68 +43,50 @@ class App extends Component {
     this.setState({ base, fxData });
   }
 
-  handleFileData(fileData) {
-    //if there is a message instead of a file
-    if (fileData.msg) {
-      this.setState({
-        msg: fileData.msg,
-        transactions: null
-      });
-    }
-    //if valid file sent
-    else {
-      //clear message
-      let msg = null;
-      let txSummary = {};
-      let rates = [];
+  handleTxLoad(txData) {
+    console.log("Loading transactions.");
 
-      //send transactions to server
-      axios.post(this.props.url  + "/uploads", fileData)
-      //TODO: show success/failure in client
-      .then(res => console.log("Transactions saved! ( /transactions )"))
+    //if error reading file
+    if (txData.msg) return this.setState({ msg: txData.msg, transactions: null});
+
+    //if valid data
+    //if loading transactions from DB
+    if (txData === "db") {
+      this.setState({ msg: "..." });
+      //get transactions from db
+      utils.getTxData(this.props.url + "/transactions")
+      .then(txData => {
+        return utils.getFxData(this.state.base, this.props.currencies, txData)
+      })
+      .then(data => {
+        this.setState({
+          msg: null,
+          transactions: data.txSum,
+          fxData: data.rates
+        });
+      }).catch(err => console.log(err));
+    }
+    //if loading transactions data from file
+    else {
+      //save transactions to database
+      axios.post(this.props.url + "/uploads", txData)
+      .then(console.log("Transactions saved. (/transactions)"))
       .catch(err => console.log(err));
 
-      //summarize transactions
-      fileData.forEach(tx => {
-        txSummary.hasOwnProperty(tx.currency) ?
-        txSummary[tx.currency] += +tx.amount :
-        txSummary[tx.currency] = +tx.amount;
-      });
-
-      //get combined unique currencies from transactions and switcher
-      let currencies = Object.keys(txSummary).concat(this.props.currencies);
-      currencies = currencies.filter((el,pos) => {
-        return currencies.indexOf(el) === pos;
-      });
-
       //get exchange rates
-      api.getExchangeRates(this.state.base, currencies)
-      .then(res => {
-        res.forEach(item => {
-          //add chosen currency rate
-          item.data.rates[item.data.base] = 1.0;
-          rates.push(item.data);
-        })
-
-        //filter transactions (remove currencies without api results or undefined)
-        txSummary = Object.keys(txSummary)
-          .filter(key => Object.keys(res[0].data.rates).includes(key))
-          .reduce((obj, key) => {
-            obj[key] = txSummary[key];
-            return obj;
-          },{});
-
+      utils.getFxData(this.state.base, this.props.currencies, txData)
+      .then(data => {
         this.setState({
-          msg,
-          transactions: txSummary,
-          fxData: rates
+          msg: null,
+          transactions: data.txSum,
+          fxData: data.rates
         });
-      });
+      }).catch(err => console.log(err));
     }
   }
 
   getTblData() {
-    console.log("Getting table data.");
+    console.log("Calculating table data.");
     //construct table data
     const { base, transactions, fxData } = this.state;
 
@@ -169,32 +128,29 @@ class App extends Component {
   }
 
   render() {
-    console.log("Rendering app.");
-
+    let msg = this.state.msg;
     return (
       <div className="app">
-        <div className="selector">
-          <FileUpload
-            onFileUpload={this.handleFileData}>
-          </FileUpload>
-          <Switcher
-            currencies={this.props.currencies}
-            selectedCurr={this.state.base}
-            onCurrChange={this.handleCurrChange} >
-          </Switcher>
-        </div>
-        { this.state.msg ?
-          <Msg text={this.state.msg} /> :
-            this.state.transactions ?
-            !this.state.fxData ?
-            <Loading /> :
-              <Table tableData={this.getTblData()} /> :
-                null
+        <Inputs
+          selectedCurr={this.state.base}
+          currencies={this.props.currencies}
+          onCurrChange={this.handleCurrChange}
+          onDataLoad={this.handleTxLoad} >
+        </Inputs>
+        { msg ?
+          msg === "..." ?
+          <Loading /> :
+            <Msg text={this.state.msg} /> :
+              this.state.transactions ?
+              !this.state.fxData ?
+              <Loading className="msg"/> :
+                <Table tableData={this.getTblData()} /> :
+                  null
         }
-          <p className="desc">
-            Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.
-            Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
-          </p>
+        <p className="desc">
+          Accepts JSON file upload in <code>{"[{ currency: 'EUR', amount: 192.23 }, ... { currency: 'CHF', amount: 1234.79 }]"}</code> format.
+          Outputs 5 days from the previous 30 day period that would yield the highest transaction summary of chosen currency.
+        </p>
       </div>
     )
   }

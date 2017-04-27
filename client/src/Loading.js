@@ -29,7 +29,7 @@ class Loading extends Component {
 
   render() {
     return (
-      <p className="loader">
+      <p className="msg">
         {this.state.text}
       </p>
     )
@@ -37,7 +37,7 @@ class Loading extends Component {
 }
 
 Loading.defaultProps = {
-  text: "",
+  text: " ",
   speed: 200
 }
 

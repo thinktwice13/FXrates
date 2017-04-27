@@ -8,7 +8,7 @@ App hosted on [Heroku](https://fxrates-5697.herokuapp.com/)
 
 
 TODO:
-* add database save/load option
+* add database save button
 
 --------
 Using [fixer.io](fixer.io) data

@@ -10,6 +10,8 @@ class Table extends Component {
       sortBy: "date",
       sortDir: "desc"
     }
+
+    this.sortTbl = this.sortTbl.bind(this);
   }
 
   componentWillMount() {
@@ -24,20 +26,24 @@ class Table extends Component {
     }, this.sortTbl);
   }
 
-  sortTbl(col) {
-    console.log("Sorting table");
+  sortTbl(e) {
+    //determine sorting column and direction
+    let sortBy = (e && e.target.id) || this.state.sortBy;
+    let sortDir = (e && e.deltaY) || this.state.sortDir;
 
-    const sortBy = col || this.state.sortBy;
-    let sortDir = this.state.sortDir;
-
-    //determine sort direction on click
-    if (col) {
-      if (sortBy === this.state.sortBy) {
-        sortDir = this.state.sortDir === "asc" ? "desc" : "asc";
-      } else sortDir = "desc";
+    if (e) {
+      sortDir = (() => {
+        if (e.deltaY) return e.deltaY > 0 ? "desc" : "asc";
+        if (sortBy === this.state.sortBy) {
+          return this.state.sortDir === "desc" ? "asc" : "desc";
+        } else return "desc";
+      })();
     }
+    //exit if no sorting needed
+    if (e && sortBy === this.state.sortBy && sortDir === this.state.sortDir) return;
 
     //sort rows
+    console.log("Sorting table by",sortBy, sortDir);
     const data = this.state.data.sort((a,b) => {
       let sortVal = 0;
       if (a[sortBy] > b[sortBy]) sortVal = 1;
@@ -45,7 +51,6 @@ class Table extends Component {
       if (sortDir === "desc") sortVal *= -1;
       return sortVal;
     })
-
     this.setState({
       sortBy,
       sortDir,
@@ -54,14 +59,13 @@ class Table extends Component {
   }
 
   render() {
-    console.log("Rendering Table.");
     //setup sorting arrow
     const sortDirArrow = this.state.sortDir === "desc" ? " ▼" : " ▲";
 
     return (
       <div>
         <div>
-          <table className="convTbl">
+          <table>
             <tbody>
               <tr>
                 <th>Converted</th>
@@ -71,20 +75,21 @@ class Table extends Component {
               </tr>
             </tbody>
           </table>
-
-          <table className="mainTbl">
+          <table>
             <tbody>
               <tr>
                 <th
                   id="date"
-                  onClick={this.sortTbl.bind(this, "date")}
-                  className={this.state.sortBy === "date" ? "selected" : null}>
+                  onWheel={this.sortTbl}
+                  onClick={this.sortTbl}
+                  className={this.state.sortBy === "date" ? "active" : null}>
                   {"Date"+ (this.state.sortBy === "date" ? sortDirArrow : "")}
                 </th>
                 <th
                   id="sum"
-                  onClick={this.sortTbl.bind(this, "sum")}
-                  className={this.state.sortBy === "sum" ? "selected" : null}>
+                  onWheel={this.sortTbl}
+                  onClick={this.sortTbl}
+                  className={this.state.sortBy === "sum" ? "active" : null}>
                   {"Sum"+ (this.state.sortBy === "sum" ? sortDirArrow : "")}
                 </th>
               </tr>
