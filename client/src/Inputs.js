@@ -33,7 +33,7 @@ function DbSave(props) {
       <li
         className={props.disabled ? "disabled" : (props.label && "active")}
         id="save"
-        onClick={props.onDbSave} >
+        onClick={props.label && props.onDbSave} >
         {props.label || "Save to DB"}
       </li>
   )
@@ -51,7 +51,7 @@ function DbLoad(props) {
       <li
         id="db"
         className={props.label && "active"}
-        onClick={props.onDbLoad}>
+        onClick={!props.label && props.onDbLoad}>
         {props.label || "Load from DB"}
       </li>
   )
@@ -102,24 +102,18 @@ class Inputs extends Component {
   }
 
   handleDataSave() {
-    //exits if there is no file data loaded
-    if (!this.state.fileData) return;
     //posts transactions to /uploads and saves to DB
     axios.post(this.props.url + "/uploads", this.state.fileData)
-    .then(res => console.log(res.data))
-    .then(
-      this.setState({
-        saveLbl: "Saved to DB"
-      })
-    )
+    .then(res => {
+      console.log(res.data)
+      this.setState({ saveLbl: "Saved to DB" })
+    })
     .catch(err => console.log(err));
   }
 
   handleDataLoad (e) {
     //if save button clicked
     if (e.target.id === "db") {
-      //exit if DB data alreaddy loaded
-      if (this.state.dbLbl) return;
 
       //otherwise load from db
       console.log("Fetching db data.");

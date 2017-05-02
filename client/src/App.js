@@ -36,7 +36,7 @@ class App extends Component {
       item.base = base;
       const saved = item.rates[base];
       Object.keys(item.rates).forEach(curr => {
-        item.rates[curr] = Math.round((item.rates[curr]*10000) / saved) / 10000;
+        item.rates[curr] /= saved;
       })
     })
     this.setState({ base, fxData });
