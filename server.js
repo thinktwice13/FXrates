@@ -39,7 +39,7 @@ app.get("/transactions/", (req, res) => {
 app.post("/uploads/", (req, res) => {
   //FIXME: rm forEach ---> batch insert !!
   req.body.forEach(item => {
-    let transaction = new Transaction({
+    const transaction = new Transaction({
       currency: item.currency,
       amount: item.amount
     });

@@ -2,7 +2,7 @@ import axios from "axios";
 import moment from "moment";
 
 export default {
-  getFxData(base, currs, txData) {
+  getFxData(base, symbols, txData) {
     let txSum = {};
     //summarize transactions {"EUR":123, "USD":456, ...}
     txData.forEach(tx => {
@@ -12,20 +12,19 @@ export default {
     });
 
     //get unique combined currencies from transactions and switcher options
-    let symbols = Object.keys(txSum).concat(currs);
-    currs = currs.filter((el,pos) => {
-      return currs.indexOf(el) === pos;
+    symbols = [...symbols, ...Object.keys(txSum)].filter((el,pos,arr) => {
+      return arr.indexOf(el) === pos;
     });
 
     //get API url requirements
-    let apiUrl = "https://api.fixer.io/";
+    const apiUrl = "https://api.fixer.io/";
     //get date range
-    let dates = [];
+    const dates = [];
     for (let i = 1; i <= 30; i++) {
       dates.push(moment().subtract(i,"d").format("YYYY-MM-DD"));
     }
     //get array of api calls
-    let promises = dates.map(date => {
+    const promises = dates.map(date => {
       return axios.get(apiUrl + date + "?base=" + base + "&symbols=" + symbols);
     })
     //fetch exchange data and return to app.handleDataLoad
@@ -36,7 +35,7 @@ export default {
         //add base currency to fxData results for easier recalc
         //FIXME: rates unnecessary??
         item.data.rates[item.data.base] = 1.0;
-        rates.push(item.data);
+        rates[rates.length] = item.data;
         return rates;
       });
 

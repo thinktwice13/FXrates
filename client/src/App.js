@@ -117,7 +117,7 @@ class App extends Component {
   }
 
   render() {
-    let msg = this.state.msg;
+    const msg = this.state.msg;
     return (
       <div className="app">
         <Inputs

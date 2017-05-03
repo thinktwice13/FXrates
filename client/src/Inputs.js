@@ -33,7 +33,7 @@ function DbSave(props) {
       <li
         className={props.disabled ? "disabled" : (props.label && "active")}
         id="save"
-        onClick={props.label && props.onDbSave} >
+        onClick={props.onDbSave} >
         {props.label || "Save to DB"}
       </li>
   )
@@ -102,6 +102,8 @@ class Inputs extends Component {
   }
 
   handleDataSave() {
+    //stop if no file data Loaded
+    if (!this.state.fileData) return;
     //posts transactions to /uploads and saves to DB
     axios.post(this.props.url + "/uploads", this.state.fileData)
     .then(res => {
