@@ -32,6 +32,7 @@ class Table extends Component {
     let sortDir = (e && e.deltaY) || this.state.sortDir;
 
     if (e) {
+      e.preventDefault();
       sortDir = (() => {
         if (e.deltaY) return e.deltaY > 0 ? "desc" : "asc";
         if (sortBy === this.state.sortBy) {
